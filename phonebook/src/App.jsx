@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
-import axios from 'axios'
+import { ToastContainer, toast } from 'react-toastify'
+import 'react-toastify/ReactToastify.css'
 import Filter from './components/Filter'
 import PersonForm from './components/PersonForm'
 import Person from './components/Person'
@@ -35,6 +36,10 @@ const App = () => {
 						)
 					)
 				})
+				toast.success(`${existingContact.name} updated successfully`, {
+					position: 'top-center',
+					autoClose: 2500,
+				})
 				setNewName('')
 				setNewPhone('')
 			}
@@ -47,6 +52,11 @@ const App = () => {
 			phonebook.create(newContact).then((returnedObject) => {
 				setPersons(persons.concat(returnedObject))
 			})
+			toast.success(`added ${newContact.name}`, {
+				position: 'top-center',
+				autoClose: 2500,
+			})
+
 			setNewName('')
 			setNewPhone('')
 		}
@@ -54,9 +64,18 @@ const App = () => {
 
 	const deleteContact = (id, name) => {
 		if (window.confirm(`Delete ${name}?`)) {
-			phonebook.deleteContact(id).then((returnedObject) => {
-				setPersons(persons.filter((person) => person.id !== id))
-			})
+			phonebook
+				.deleteContact(id)
+				.then(() => {
+					setPersons(persons.filter((person) => person.id !== id))
+				})
+				.catch(() => {
+					setPersons(persons.filter((person) => person.id !== id))
+					toast.error(`${name} has already been removed`, {
+						position: 'top-center',
+						autoClose: 2500,
+					})
+				})
 		}
 	}
 
@@ -67,6 +86,7 @@ const App = () => {
 	return (
 		<div>
 			<h1>Phonebook</h1>
+			<ToastContainer />
 			<Filter filter={filter} setFilter={setFilter} />
 			<h2>add new</h2>
 			<PersonForm
